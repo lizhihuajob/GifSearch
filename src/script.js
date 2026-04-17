@@ -12,18 +12,21 @@ let isSearchMode = false;
 const searchInput = document.getElementById('searchInput');
 const searchButton = document.getElementById('searchButton');
 const trendingButton = document.getElementById('trendingButton');
+const clearButton = document.getElementById('clearButton');
 const gifGrid = document.getElementById('gifGrid');
 const loading = document.getElementById('loading');
 const loadMoreContainer = document.getElementById('loadMoreContainer');
 const loadMoreButton = document.getElementById('loadMoreButton');
 const noResults = document.getElementById('noResults');
 const errorMessage = document.getElementById('errorMessage');
+const errorTitle = document.getElementById('errorTitle');
+const errorText = document.getElementById('errorText');
 const resultsInfo = document.getElementById('resultsInfo');
 const modal = document.getElementById('modal');
 const modalImage = document.getElementById('modalImage');
 const modalTitle = document.getElementById('modalTitle');
 const modalLink = document.getElementById('modalLink');
-const closeModal = document.querySelector('.close');
+const modalClose = document.getElementById('modalClose');
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeApiKey();
@@ -62,94 +65,6 @@ function showApiKeyHelp() {
         </div>
     `;
     
-    helpMessage.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.9);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 2000;
-        padding: 20px;
-    `;
-    
-    const style = document.createElement('style');
-    style.textContent = `
-        .api-key-help-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 12px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .api-key-help-content h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-        }
-        .api-key-help-content p {
-            color: #333;
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-        .api-key-help-content ol {
-            margin: 20px 0;
-            padding-left: 25px;
-        }
-        .api-key-help-content li {
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .api-key-help-content a {
-            color: #667eea;
-            text-decoration: none;
-        }
-        .api-key-help-content a:hover {
-            text-decoration: underline;
-        }
-        .api-key-input-section {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        .api-key-input-section input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-        .api-key-input-section input:focus {
-            border-color: #667eea;
-            outline: none;
-        }
-        .api-key-input-section button {
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        .api-key-input-section button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        .api-key-help-content .note {
-            font-size: 0.9rem;
-            color: #666;
-            font-style: italic;
-        }
-    `;
-    
-    document.head.appendChild(style);
     document.body.appendChild(helpMessage);
     
     const apiKeyInput = document.getElementById('apiKeyInput');
@@ -170,6 +85,10 @@ function showApiKeyHelp() {
             saveButton.click();
         }
     });
+    
+    setTimeout(() => {
+        apiKeyInput.focus();
+    }, 100);
 }
 
 function setupEventListeners() {
@@ -180,43 +99,69 @@ function setupEventListeners() {
         }
     });
     
+    searchInput.addEventListener('input', () => {
+        updateClearButton();
+    });
+    
+    clearButton.addEventListener('click', () => {
+        searchInput.value = '';
+        updateClearButton();
+        searchInput.focus();
+    });
+    
     trendingButton.addEventListener('click', () => {
         searchInput.value = '';
+        updateClearButton();
         loadTrendingGifs();
     });
     
     loadMoreButton.addEventListener('click', loadMoreGifs);
     
-    closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
+    modalClose.addEventListener('click', () => {
+        closeModal();
     });
     
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
+        if (e.target.classList.contains('modal-backdrop') || e.target.classList.contains('modal')) {
+            closeModal();
         }
     });
     
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
-            modal.style.display = 'none';
+            closeModal();
         }
     });
+}
+
+function updateClearButton() {
+    if (searchInput.value.trim().length > 0) {
+        clearButton.style.display = 'flex';
+    } else {
+        clearButton.style.display = 'none';
+    }
+}
+
+function closeModal() {
+    modal.style.display = 'none';
 }
 
 function showLoading(show) {
     loading.style.display = show ? 'flex' : 'none';
 }
 
-function showError(show, message = null) {
-    errorMessage.style.display = show ? 'block' : 'none';
+function showError(show, title = null, message = null) {
+    errorMessage.style.display = show ? 'flex' : 'none';
+    if (title) {
+        errorTitle.textContent = title;
+    }
     if (message) {
-        errorMessage.innerHTML = `<p>${message}</p>`;
+        errorText.textContent = message;
     }
 }
 
 function showNoResults(show) {
-    noResults.style.display = show ? 'block' : 'none';
+    noResults.style.display = show ? 'flex' : 'none';
 }
 
 function showLoadMoreButton(show) {
@@ -337,12 +282,12 @@ async function loadTrendingGifs() {
     } catch (error) {
         console.error('Error loading trending GIFs:', error);
         if (error.message.includes('403')) {
-            showError(true, 'API Key 无效或已过期，请配置您自己的 Giphy API Key');
+            showError(true, 'API Key 无效或已过期', '请配置您自己的 Giphy API Key');
             setTimeout(() => {
                 showApiKeyHelp();
             }, 1000);
         } else {
-            showError(true, '加载失败，请稍后重试');
+            showError(true, '加载失败', '请稍后重试');
         }
     } finally {
         showLoading(false);
@@ -391,12 +336,12 @@ async function handleSearch() {
     } catch (error) {
         console.error('Error searching GIFs:', error);
         if (error.message.includes('403')) {
-            showError(true, 'API Key 无效或已过期，请配置您自己的 Giphy API Key');
+            showError(true, 'API Key 无效或已过期', '请配置您自己的 Giphy API Key');
             setTimeout(() => {
                 showApiKeyHelp();
             }, 1000);
         } else {
-            showError(true, '搜索失败，请稍后重试');
+            showError(true, '搜索失败', '请稍后重试');
         }
     } finally {
         showLoading(false);
@@ -434,12 +379,12 @@ async function loadMoreGifs() {
     } catch (error) {
         console.error('Error loading more GIFs:', error);
         if (error.message.includes('403')) {
-            showError(true, 'API Key 无效或已过期，请配置您自己的 Giphy API Key');
+            showError(true, 'API Key 无效或已过期', '请配置您自己的 Giphy API Key');
             setTimeout(() => {
                 showApiKeyHelp();
             }, 1000);
         } else {
-            showError(true, '加载更多失败，请稍后重试');
+            showError(true, '加载更多失败', '请稍后重试');
         }
     } finally {
         showLoading(false);
