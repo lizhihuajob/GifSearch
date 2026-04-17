@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF 动图搜索引擎</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>GIF 动图搜索引擎</h1>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="搜索 GIF 动图..." />
+                <button id="searchButton">搜索</button>
+                <button id="trendingButton">热门</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="resultsInfo" class="results-info"></div>
+        <div id="gifGrid" class="gif-grid"></div>
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>加载中...</p>
+        </div>
+        <div id="loadMoreContainer" style="display: none;">
+            <button id="loadMoreButton">加载更多</button>
+        </div>
+        <div id="noResults" class="no-results" style="display: none;">
+            <p>没有找到相关的 GIF 动图</p>
+        </div>
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <p>加载失败，请稍后重试</p>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Powered by <a href="https://giphy.com" target="_blank">GIPHY</a></p>
+        </div>
+    </footer>
+
+    <div id="modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img id="modalImage" src="" alt="Full size GIF" />
+            <div class="modal-info">
+                <h3 id="modalTitle"></h3>
+                <a id="modalLink" href="#" target="_blank">在 GIPHY 上查看</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
