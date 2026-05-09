@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  gifsearch:
+    build: .
+    container_name: gif_search_app
+    ports:
+      - "8083:80"
+    restart: unless-stopped
